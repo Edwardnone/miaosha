@@ -1,5 +1,7 @@
 package com.miaoshaproject.miaosha.service;
 
+import com.miaoshaproject.miaosha.dataobject.UserDO;
+import com.miaoshaproject.miaosha.error.BusinessException;
 import com.miaoshaproject.miaosha.service.model.UserModel;
 
 /**
@@ -16,4 +18,11 @@ public interface UserService {
      * @param id
      */
     UserModel getUserById(Integer id);
+
+    /**
+     * 用户注册
+     * @param userModel
+     * @return
+     */
+    void register(UserModel userModel) throws BusinessException;
 }
