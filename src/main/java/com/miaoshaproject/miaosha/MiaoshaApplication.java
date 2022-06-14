@@ -3,7 +3,6 @@ package com.miaoshaproject.miaosha;
 import com.miaoshaproject.miaosha.dao.UserDOMapper;
 import com.miaoshaproject.miaosha.dataobject.UserDO;
 import org.mybatis.spring.annotation.MapperScan;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class MiaoshaApplication {
 
     private UserDOMapper userDOMapper;
+
 
     public MiaoshaApplication(UserDOMapper userDOMapper) {
         this.userDOMapper = userDOMapper;
