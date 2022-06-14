@@ -10,6 +10,7 @@ import com.miaoshaproject.miaosha.service.UserService;
 import com.miaoshaproject.miaosha.service.model.UserModel;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -61,13 +62,19 @@ public class UserServiceImpl implements UserService {
             StringUtils.isEmpty(userModel.getTelphone()) ||
             userModel.getAge() == null ||
             userModel.getGender() == 0) {
-            throw new BusinessException(EmBusinessError.UNKNOWN_ERROR);
+            throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR);
         }
         //插入一条用户记录
         UserDO userDO = convertFromUserModel(userModel);
-        userDOMapper.insertSelective(userDO);
+        try{
+            userDOMapper.insertSelective(userDO);
+        }catch (DuplicateKeyException e){
+            throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR, "该手机号已注册");
+        }
+
+        userModel.setId(userDO.getId());
         //插入一条密码记录
-        UserPasswordDO userPasswordDO = convertPasswordFromUserModel(userModel, userDO.getId());
+        UserPasswordDO userPasswordDO = convertPasswordFromUserModel(userModel);
         userPasswordDOMapper.insertSelective(userPasswordDO);
     }
 
@@ -94,13 +101,13 @@ public class UserServiceImpl implements UserService {
         return userDO;
     }
 
-    private UserPasswordDO convertPasswordFromUserModel(UserModel userModel, int userId){
+    private UserPasswordDO convertPasswordFromUserModel(UserModel userModel){
         if (userModel == null){
             return null;
         }
 
         UserPasswordDO userPasswordDO = new UserPasswordDO();
-        userPasswordDO.setUserId(userId);
+        userPasswordDO.setUserId(userModel.getId());
         userPasswordDO.setEncrptPassword(userModel.getEncrptPassword());
         return userPasswordDO;
     }
