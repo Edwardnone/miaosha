@@ -34,6 +34,20 @@
     from user_info
     where id = #{id,jdbcType=INTEGER}
   </select>
+  <!--
+      /**
+     * 通过手机号查询用户信息
+     * @param telphone
+     * @return
+     */
+    UserDO selectByTelphone(String telphone);
+  -->
+  <select id="selectByTelphone" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List"></include>
+    from user_info
+    where telphone = #{telphone}
+  </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
     <!--
       WARNING - @mbg.generated

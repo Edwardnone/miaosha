@@ -7,7 +7,7 @@ import com.miaoshaproject.miaosha.error.EmBusinessError;
 import com.miaoshaproject.miaosha.response.CommonReturnType;
 import com.miaoshaproject.miaosha.service.UserService;
 import com.miaoshaproject.miaosha.service.model.UserModel;
-import org.apache.tomcat.util.security.MD5Encoder;
+import com.miaoshaproject.miaosha.validator.ValidationImpl;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +17,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
 import java.util.Random;
 
 /**
@@ -35,9 +34,23 @@ public class UserController extends BaseController{
 
     private HttpServletRequest httpServletRequest;
 
+
     public UserController(UserService userService, HttpServletRequest httpServletRequest) {
         this.userService = userService;
         this.httpServletRequest = httpServletRequest;
+    }
+
+    @RequestMapping("/login")
+    @ResponseBody
+    public CommonReturnType login(@RequestParam(name = "telphone") String telphone,
+                                  @RequestParam(name = "password") String password) throws BusinessException, NoSuchAlgorithmException {
+        //判断参数是否为空
+        if (StringUtils.isEmpty(telphone) || StringUtils.isEmpty(password)){
+            throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR);
+        }
+        UserModel userModel = userService.verifyLogin(telphone, getEncrptPassword(password));
+        httpServletRequest.getSession().setAttribute("userInfo", userModel);
+        return CommonReturnType.create(null);
     }
 
     @RequestMapping(value = "/register", method = RequestMethod.POST)
@@ -96,7 +109,7 @@ public class UserController extends BaseController{
         //userModel.setEncrptPassword("123");
         //若获取的对应用户信息不存在
         if (userModel == null){
-            throw new BusinessException(EmBusinessError.USER_NOT_EXIST);
+            throw new BusinessException(EmBusinessError.USER_NOT_EXIST_ERROR);
         }
         //将核心领域模型用户对象转化为可供UI使用的viewobject
         UserVO userVO = convertFromModel(userModel);

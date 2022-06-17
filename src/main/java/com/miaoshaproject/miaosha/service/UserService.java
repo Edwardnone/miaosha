@@ -25,4 +25,12 @@ public interface UserService {
      * @return
      */
     void register(UserModel userModel) throws BusinessException;
+
+    /**
+     * 验证手机号为telphone的密码是否为password
+     * @param telphone
+     * @param password
+     * @return
+     */
+    public UserModel verifyLogin(String telphone, String encrptPassword) throws BusinessException;
 }
