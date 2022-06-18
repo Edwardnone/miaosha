@@ -14,6 +14,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -59,7 +60,18 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemModel> listItem() {
-        return null;
+        List<ItemDO> itemDOList = itemDOMapper.selectAll();
+        List<ItemStockDO> itemStockDOList = itemStockDOMapper.selectAll();
+        List<ItemModel> itemModelList = new ArrayList<>();
+        for(ItemDO itemDO: itemDOList){
+            for (ItemStockDO itemStockDO: itemStockDOList){
+                if (itemDO.getId().equals(itemStockDO.getItemId())){
+                    itemModelList.add(convertItemModelFromDataObject(itemDO, itemStockDO));
+                    break;
+                }
+            }
+        }
+        return itemModelList;
     }
 
     @Override

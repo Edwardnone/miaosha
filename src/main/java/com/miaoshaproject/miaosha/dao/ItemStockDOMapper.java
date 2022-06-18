@@ -3,6 +3,8 @@ package com.miaoshaproject.miaosha.dao;
 import com.miaoshaproject.miaosha.dataobject.ItemStockDO;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.util.List;
+
 @Mapper
 public interface ItemStockDOMapper {
     /**
@@ -51,4 +53,10 @@ public interface ItemStockDOMapper {
      * @mbg.generated Fri Jun 17 09:58:16 GMT+08:00 2022
      */
     int updateByPrimaryKey(ItemStockDO row);
+
+    /**
+     * 查询所有商品的库存信息
+     * @return
+     */
+    List<ItemStockDO> selectAll();
 }

@@ -8,10 +8,13 @@ import com.miaoshaproject.miaosha.service.model.ItemModel;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @Author yangLe
@@ -43,8 +46,26 @@ public class ItemController extends BaseController{
         itemModel.setDescription(description);
         itemModel.setImgUrl(imgUrl);
         ItemModel resItemModel = itemService.createItem(itemModel);
-        ItemVO itemVO = new ItemVO();
-        BeanUtils.copyProperties(resItemModel, itemVO);
+        ItemVO itemVO = convertItemVOFromItemModel(resItemModel);
         return CommonReturnType.create(itemVO);
+    }
+
+
+
+    @RequestMapping(value = "/listItem", method = RequestMethod.GET)
+    @ResponseBody
+    public CommonReturnType listItem(){
+        List<ItemModel> itemModelList = itemService.listItem();
+        List<ItemVO> itemVOList = new ArrayList<>();
+        for (ItemModel itemModel: itemModelList){
+            itemVOList.add(convertItemVOFromItemModel(itemModel));
+        }
+        return CommonReturnType.create(itemVOList);
+    }
+
+    private ItemVO convertItemVOFromItemModel(ItemModel itemModel){
+        ItemVO itemVO = new ItemVO();
+        BeanUtils.copyProperties(itemModel, itemVO);
+        return itemVO;
     }
 }

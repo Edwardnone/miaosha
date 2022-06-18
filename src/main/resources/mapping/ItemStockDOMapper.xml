@@ -25,6 +25,18 @@
     from item_stock
     where item_id = #{itemId,jdbcType=INTEGER}
   </select>
+  <select id="selectAll" resultMap="BaseResultMap">
+    <!--
+        /**
+     * 查询所有商品的库存信息
+     * @return
+     */
+    List<ItemStockDO> selectAll();
+    -->
+    select
+    <include refid="Base_Column_List" />
+    from item_stock
+  </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
     <!--
       WARNING - @mbg.generated

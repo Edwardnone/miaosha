@@ -3,6 +3,8 @@ package com.miaoshaproject.miaosha.dao;
 import com.miaoshaproject.miaosha.dataobject.ItemDO;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.util.List;
+
 @Mapper
 public interface ItemDOMapper {
     /**
@@ -52,4 +54,10 @@ public interface ItemDOMapper {
      * @mbg.generated Fri Jun 17 09:58:16 GMT+08:00 2022
      */
     int updateByPrimaryKey(ItemDO row);
+
+    /**
+     * 查询所有的商品
+     * @return
+     */
+    List<ItemDO> selectAll();
 }
