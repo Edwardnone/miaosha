@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @Author yangLe
@@ -61,22 +62,36 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<ItemModel> listItem() {
         List<ItemDO> itemDOList = itemDOMapper.selectAll();
-        List<ItemStockDO> itemStockDOList = itemStockDOMapper.selectAll();
-        List<ItemModel> itemModelList = new ArrayList<>();
-        for(ItemDO itemDO: itemDOList){
-            for (ItemStockDO itemStockDO: itemStockDOList){
-                if (itemDO.getId().equals(itemStockDO.getItemId())){
-                    itemModelList.add(convertItemModelFromDataObject(itemDO, itemStockDO));
-                    break;
-                }
-            }
-        }
+        List<ItemModel> itemModelList = itemDOList.stream().map(itemDO -> {
+            ItemStockDO itemStockDO = itemStockDOMapper.selectByItemId(itemDO.getId());
+            ItemModel itemModel = convertItemModelFromDataObject(itemDO, itemStockDO);
+            return itemModel;
+        }).collect(Collectors.toList());
         return itemModelList;
     }
 
     @Override
-    public ItemModel getItem(String id) {
-        return null;
+    public ItemModel getItemById(Integer id) {
+        ItemDO itemDO = itemDOMapper.selectByPrimaryKey(id);
+        ItemStockDO itemStockDO = itemStockDOMapper.selectByItemId(id);
+        ItemModel itemModel = convertItemModelFromDataObject(itemDO, itemStockDO);
+        return itemModel;
+    }
+
+    @Transactional(rollbackFor = java.lang.Exception.class)
+    @Override
+    public Boolean decreaseStock(Integer amount, Integer itemId) {
+        int res = itemStockDOMapper.decreaseStock(amount, itemId);
+        if (res > 0){
+            return true;
+        }
+        return false;
+    }
+
+    @Transactional(rollbackFor = java.lang.Exception.class)
+    @Override
+    public void increaseSales(Integer itemId, Integer amount) {
+        itemDOMapper.increaseSales(itemId, amount);
     }
 
     private ItemDO convertItemDOFromItemModel(ItemModel itemModel){

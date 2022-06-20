@@ -2,6 +2,7 @@ package com.miaoshaproject.miaosha.dao;
 
 import com.miaoshaproject.miaosha.dataobject.ItemDO;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -60,4 +61,12 @@ public interface ItemDOMapper {
      * @return
      */
     List<ItemDO> selectAll();
+
+    /**
+     * 增加销量数
+     * @param itemId
+     * @param amount
+     * @return
+     */
+    int increaseSales(@Param("itemId") Integer itemId, @Param("amount") Integer amount);
 }

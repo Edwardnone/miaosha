@@ -22,7 +22,7 @@ import java.util.List;
  * @Date 2022/6/17 10:56
  * @Version 1.0
  */
-@Controller("/item")
+@Controller("item")
 @RequestMapping("/item")
 public class ItemController extends BaseController{
 
@@ -61,6 +61,14 @@ public class ItemController extends BaseController{
             itemVOList.add(convertItemVOFromItemModel(itemModel));
         }
         return CommonReturnType.create(itemVOList);
+    }
+
+    @RequestMapping(value = "/getItem", method = RequestMethod.GET)
+    @ResponseBody
+    public CommonReturnType getItem(@RequestParam(name = "id") Integer id){
+        ItemModel itemModel = itemService.getItemById(id);
+        ItemVO itemVO = convertItemVOFromItemModel(itemModel);
+        return CommonReturnType.create(itemVO);
     }
 
     private ItemVO convertItemVOFromItemModel(ItemModel itemModel){

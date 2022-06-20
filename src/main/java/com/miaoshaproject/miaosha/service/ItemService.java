@@ -28,9 +28,24 @@ public interface ItemService {
     public List<ItemModel> listItem();
 
     /**
-     * 查看商品详情信息
+     * 查看指定id商品详情信息
      * @param id
      * @return
      */
-    public ItemModel getItem(String id);
+    public ItemModel getItemById(Integer id);
+
+    /**
+     * 减少指定id商品的库存数量
+     * @param amount
+     * @param itemId
+     * @return
+     */
+    public Boolean decreaseStock(Integer amount, Integer itemId);
+
+    /**
+     * 增加指定id商品的销量
+     * @param itemId
+     * @param amount
+     */
+    public void increaseSales(Integer itemId, Integer amount);
 }

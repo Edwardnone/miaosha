@@ -2,6 +2,7 @@ package com.miaoshaproject.miaosha.dao;
 
 import com.miaoshaproject.miaosha.dataobject.ItemStockDO;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -59,4 +60,12 @@ public interface ItemStockDOMapper {
      * @return
      */
     List<ItemStockDO> selectAll();
+
+    /**
+     * 减少指定数量的库存
+     * @param amount
+     * @param itemId
+     * @return
+     */
+    int decreaseStock(@Param("amount") Integer amount, @Param("itemId") Integer itemId);
 }
