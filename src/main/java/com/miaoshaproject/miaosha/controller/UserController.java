@@ -49,7 +49,8 @@ public class UserController extends BaseController{
             throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR);
         }
         UserModel userModel = userService.verifyLogin(telphone, getEncrptPassword(password));
-        httpServletRequest.getSession().setAttribute("userInfo", userModel);
+        httpServletRequest.getSession().setAttribute("LOGIN_USER", userModel);
+        httpServletRequest.getSession().setAttribute("IS_LOGIN", true);
         return CommonReturnType.create(null);
     }
 
