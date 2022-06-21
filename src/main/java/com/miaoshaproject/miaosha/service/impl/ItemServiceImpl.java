@@ -7,14 +7,16 @@ import com.miaoshaproject.miaosha.dataobject.ItemStockDO;
 import com.miaoshaproject.miaosha.error.BusinessException;
 import com.miaoshaproject.miaosha.error.EmBusinessError;
 import com.miaoshaproject.miaosha.service.ItemService;
+import com.miaoshaproject.miaosha.service.PromoService;
 import com.miaoshaproject.miaosha.service.model.ItemModel;
+import com.miaoshaproject.miaosha.service.model.PromoModel;
 import com.miaoshaproject.miaosha.validator.ValidationImpl;
 import com.miaoshaproject.miaosha.validator.ValidationResult;
+import org.joda.time.DateTime;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,11 +32,13 @@ public class ItemServiceImpl implements ItemService {
     private ValidationImpl validationImpl;
     private ItemDOMapper itemDOMapper;
     private ItemStockDOMapper itemStockDOMapper;
+    private PromoService promoService;
 
-    public ItemServiceImpl(ValidationImpl validation, ItemDOMapper itemDOMapper, ItemStockDOMapper itemStockDOMapper) {
+    public ItemServiceImpl(ValidationImpl validation, ItemDOMapper itemDOMapper, ItemStockDOMapper itemStockDOMapper, PromoService promoService) {
         this.validationImpl = validation;
         this.itemDOMapper = itemDOMapper;
         this.itemStockDOMapper = itemStockDOMapper;
+        this.promoService = promoService;
     }
 
     @Override
@@ -75,6 +79,11 @@ public class ItemServiceImpl implements ItemService {
         ItemDO itemDO = itemDOMapper.selectByPrimaryKey(id);
         ItemStockDO itemStockDO = itemStockDOMapper.selectByItemId(id);
         ItemModel itemModel = convertItemModelFromDataObject(itemDO, itemStockDO);
+        //判断商品当前是否存在秒杀活动
+        PromoModel promoModel = promoService.getPromoByItemId(itemDO.getId());
+        if (promoModel != null && promoModel.getPromoStatus() != 0){
+            itemModel.setPromoModel(promoModel);
+        }
         return itemModel;
     }
 

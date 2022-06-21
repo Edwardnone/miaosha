@@ -12,19 +12,59 @@ public class OrderModel {
     /**
      * 订单号：8位时间 + 6位序列号 + 2位分库分表号
      */
-    public String id;
+    private String id;
 
-    public Integer userId;
+    private Integer userId;
 
-    public Integer itemId;
+    private Integer itemId;
 
     /**
      * 商品下单数量
      */
-    public Integer amount;
+    private Integer amount;
 
     /**
      * 订单金额
      */
-    public BigDecimal orderAmount;
+    private BigDecimal orderAmount;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public Integer getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Integer userId) {
+        this.userId = userId;
+    }
+
+    public Integer getItemId() {
+        return itemId;
+    }
+
+    public void setItemId(Integer itemId) {
+        this.itemId = itemId;
+    }
+
+    public Integer getAmount() {
+        return amount;
+    }
+
+    public void setAmount(Integer amount) {
+        this.amount = amount;
+    }
+
+    public BigDecimal getOrderAmount() {
+        return orderAmount;
+    }
+
+    public void setOrderAmount(BigDecimal orderAmount) {
+        this.orderAmount = orderAmount;
+    }
 }

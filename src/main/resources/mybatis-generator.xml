@@ -56,7 +56,7 @@
 <!--               enableDeleteByExample="false" enableSelectByExample="false"-->
 <!--               selectByExampleQueryId="false"></table>-->
 
-        <table tableName="item_order" domainObjectName="OrderDO"
+        <table tableName="promo" domainObjectName="PromoDO"
                enableCountByExample="false" enableUpdateByExample="false"
                enableDeleteByExample="false" enableSelectByExample="false"
                selectByExampleQueryId="false"></table>

@@ -52,6 +52,19 @@ public class ItemModel {
     @NotBlank(message = "商品图片地址不能为空")
     private String imgUrl;
 
+    public PromoModel getPromoModel() {
+        return promoModel;
+    }
+
+    public void setPromoModel(PromoModel promoModel) {
+        this.promoModel = promoModel;
+    }
+
+    /**
+     * 商品秒杀信息；null表示无秒杀活动，非null表示存在还未结束的秒杀活动。
+     */
+    private PromoModel promoModel;
+
     public Integer getId() {
         return id;
     }

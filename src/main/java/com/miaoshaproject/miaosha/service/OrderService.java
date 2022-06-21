@@ -2,6 +2,8 @@ package com.miaoshaproject.miaosha.service;
 
 import com.miaoshaproject.miaosha.error.BusinessException;
 
+import java.math.BigDecimal;
+
 /**
  * @Author yangLe
  * @Description TODO
@@ -17,5 +19,5 @@ public interface OrderService {
      * @param amount
      * @throws BusinessException
      */
-    public void createOrder(Integer userId, Integer itemId, Integer amount) throws BusinessException;
+    public void createOrder(Integer userId, Integer itemId, Integer amount, BigDecimal promoItemPrice) throws BusinessException;
 }

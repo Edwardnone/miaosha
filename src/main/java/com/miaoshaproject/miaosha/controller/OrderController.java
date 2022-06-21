@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.math.BigDecimal;
 
 /**
  * @Author yangLe
@@ -37,7 +38,8 @@ public class OrderController extends BaseController {
     @RequestMapping("/createOrder")
     @ResponseBody
     public CommonReturnType createOrder(@RequestParam(name = "itemId") Integer itemId,
-                                        @RequestParam(name = "amount") Integer amount) throws BusinessException {
+                                        @RequestParam(name = "amount") Integer amount,
+                                        @RequestParam(name = "promoItemPrice", required=false)BigDecimal promoItemPrice) throws BusinessException {
 
         //用户登录验证
         Object isLogin = request.getSession().getAttribute("IS_LOGIN");
@@ -45,7 +47,7 @@ public class OrderController extends BaseController {
             throw new BusinessException(EmBusinessError.USER_NOT_LOGIN_ERROR);
         }
         UserModel userModel = (UserModel) request.getSession().getAttribute("LOGIN_USER");
-        orderService.createOrder(userModel.getId(), itemId, amount);
+        orderService.createOrder(userModel.getId(), itemId, amount, promoItemPrice);
 
         return CommonReturnType.create(null);
     }

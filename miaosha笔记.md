@@ -200,7 +200,9 @@ commit;
 
 ## 四.项目总结
 
-<img src="C:\Users\12195\AppData\Roaming\Typora\typora-user-images\image-20220620231844497.png" alt="image-20220620231844497" style="zoom:80%;" />
+<img src="C:\Users\12195\AppData\Roaming\Typora\typora-user-images\image-20220620231844497.png" alt="image-20220620231844497" style="zoom: 33%;" />
+
+<center>项目架构图</center>
 
 ### 4.1.出错调试
 
