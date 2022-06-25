@@ -198,7 +198,7 @@ commit;
 
 5、检索值的数据类型与索引字段不同，虽然MySQL能够进行数据类型转换，但却不会使用索引，从而导致InnoDB使用表锁。通过用explain检查两条SQL的执行计划，我们可以清楚地看到了这一点。
 
-## 四.项目总结
+## 三.项目总结
 
 <img src="C:\Users\12195\AppData\Roaming\Typora\typora-user-images\image-20220620231844497.png" alt="image-20220620231844497" style="zoom: 33%;" />
 
@@ -229,4 +229,66 @@ commit;
 - 库存行锁问题
 - 下单操作多，缓慢
 - 浪涌流量如何解决
+
+## 四.云端部署
+
+- 安装jdk，配置jdk环境变量
+
+- 安装mariadb (centos7使用mariadb替代mysql)
+
+- 导出导入数据库
+
+- maven打包项目
+
+- 上传项目jar包
+
+- 编写deploy脚本 deploy.sh
+
+  **nohup** 英文全称 no hang up（不挂起），用于在系统后台不挂断地运行命令，退出终端不会影响程序的运行。
+
+  nohup 命令，在默认情况下（非重定向时），会输出一个名叫 nohup.out 的文件到当前目录下，如果当前目录的 nohup.out 文件不可写，输出重定向到 $HOME/nohup.out 文件中。
+
+  ```shell
+  nohup java -Xms400m -Xmx400m -XX:NewSize=200m -XX:MaxNewSize=200m -jar miaosha.jar --spring.config.addition-location=/var/www/miaosha/application.properties
+  ```
+
+## 五.jmeter压力测试
+
+查看线程数量
+
+```shell
+ps -ef | grep java
+#查看进程的线程数量
+pstree -p 19299 | wc -l 
+#查看cpu使用情况
+top -H
+```
+
+![image-20220625151350232](C:\Users\12195\AppData\Roaming\Typora\typora-user-images\image-20220625151350232.png)
+
+load average 表示过去1分钟、5分钟、15分钟的运行进程队列中的平均进程数量（不包括：等待IO、主动wait、被kill的进程）
+
+### 5.2.发现容量问题
+
+#### 默认内嵌Tomcat配置（springboot 2.7.0）
+
+C:\jar\m2\repository\org\springframework\boot\spring-boot-autoconfigure\2.7.0\spring-boot-autoconfigure-2.7.0.jar!\META-INF\spring-configuration-metadata.json
+
+- server.tomcat.accept-count:等待队列长度，默认100
+
+- server.tomcat.max-connections:最大可被连接数，默认8192
+- server.tomcat.max-threads:最大工作线程数，默认200
+- server.tomcat.min-spare-threads:最小工作线程数，默认10
+
+- 默认配置下，连接超过8192后出现拒绝连接情况
+- 默认配置下，触发的请求超过200+100后拒绝处理
+
+上线前一定要将容器的配置、线程池的配置、连接数的配置调优，以保证再生产环境下是最优的。
+
+#### 定制化内嵌Tomcat开发
+
+- keepAliveTimeOut: 多少毫秒后不响应断开keepalive
+- maxKeepAliveRequests：多少次请求后keepalive断开失效
+- 使用WebServerFactoryCustomizer<ConfigurableServletWebServerFactory> 定制化内嵌tomcat配置
+- 
 
