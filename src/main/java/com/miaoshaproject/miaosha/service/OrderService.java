@@ -19,5 +19,5 @@ public interface OrderService {
      * @param amount
      * @throws BusinessException
      */
-    public void createOrder(Integer userId, Integer itemId, Integer amount, BigDecimal promoItemPrice) throws BusinessException;
+    public void createOrder(Integer userId, Integer itemId, Integer promoId, Integer amount, BigDecimal promoItemPrice) throws BusinessException;
 }

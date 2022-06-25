@@ -39,6 +39,7 @@ public class OrderController extends BaseController {
     @ResponseBody
     public CommonReturnType createOrder(@RequestParam(name = "itemId") Integer itemId,
                                         @RequestParam(name = "amount") Integer amount,
+                                        @RequestParam(name = "promoId", required = false) Integer promoId,
                                         @RequestParam(name = "promoItemPrice", required=false)BigDecimal promoItemPrice) throws BusinessException {
 
         //用户登录验证
@@ -47,7 +48,7 @@ public class OrderController extends BaseController {
             throw new BusinessException(EmBusinessError.USER_NOT_LOGIN_ERROR);
         }
         UserModel userModel = (UserModel) request.getSession().getAttribute("LOGIN_USER");
-        orderService.createOrder(userModel.getId(), itemId, amount, promoItemPrice);
+        orderService.createOrder(userModel.getId(), itemId, promoId, amount, promoItemPrice);
 
         return CommonReturnType.create(null);
     }

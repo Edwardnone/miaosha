@@ -11,7 +11,7 @@ import com.miaoshaproject.miaosha.validator.ValidationImpl;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import sun.misc.BASE64Encoder;
+import org.apache.commons.codec.binary.Base64;
 
 import javax.servlet.http.HttpServletRequest;
 import java.nio.charset.StandardCharsets;
@@ -81,9 +81,9 @@ public class UserController extends BaseController{
     private String getEncrptPassword(String password) throws NoSuchAlgorithmException {
         //加密方式
         MessageDigest md5 = MessageDigest.getInstance("md5");
-        BASE64Encoder base64Encoder = new BASE64Encoder();
-        //加密字符串
-        return base64Encoder.encode(md5.digest(password.getBytes(StandardCharsets.UTF_8)));
+        //BASE64Encoder base64Encoder = new BASE64Encoder();
+        byte[] bytes = Base64.encodeBase64(md5.digest(password.getBytes(StandardCharsets.UTF_8)));
+        return new String(bytes);
     }
 
 

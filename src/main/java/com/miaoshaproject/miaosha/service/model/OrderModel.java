@@ -18,6 +18,8 @@ public class OrderModel {
 
     private Integer itemId;
 
+    private Integer promoId;
+
     /**
      * 商品下单数量
      */

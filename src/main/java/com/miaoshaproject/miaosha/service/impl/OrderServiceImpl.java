@@ -43,7 +43,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional(rollbackFor = java.lang.Exception.class)
-    public void createOrder(Integer userId, Integer itemId, Integer amount, BigDecimal promoItemPrice) throws BusinessException {
+    public void createOrder(Integer userId, Integer itemId, Integer promoId, Integer amount, BigDecimal promoItemPrice) throws BusinessException {
         //校验参数
         UserModel userModel = userService.getUserById(userId);
         if (userModel == null){
@@ -80,13 +80,13 @@ public class OrderServiceImpl implements OrderService {
         orderDO.setId(orderId.toString());
         orderDO.setUserId(userId);
         orderDO.setItemId(itemId);
+        orderDO.setPromoId(promoId);
         orderDO.setAmount(amount);
         if (promoItemPrice == null){
             orderDO.setOrderAmount(itemModel.getPrice().multiply(new BigDecimal(amount)));
         }else {
             orderDO.setOrderAmount(promoItemPrice.multiply(new BigDecimal(amount)));
         }
-
         orderDOMapper.insertSelective(orderDO);
         //增加销量数
         itemService.increaseSales(itemId, amount);
