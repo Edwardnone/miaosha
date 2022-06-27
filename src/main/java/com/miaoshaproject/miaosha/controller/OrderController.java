@@ -23,7 +23,7 @@ import java.math.BigDecimal;
  */
 @Controller("orderController")
 @RequestMapping("/order")
-public class OrderController extends BaseController {
+public class OrderController{
 
     private OrderService orderService;
 

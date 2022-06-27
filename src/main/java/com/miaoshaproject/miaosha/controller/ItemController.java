@@ -24,7 +24,7 @@ import java.util.List;
  */
 @Controller("item")
 @RequestMapping("/item")
-public class ItemController extends BaseController{
+public class ItemController{
 
     private ItemService itemService;
 
