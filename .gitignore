@@ -33,3 +33,5 @@ build/
 .vscode/
 
 src/main/resources/mybatis-generator.xml
+
+miaosha笔记.md
