@@ -7,17 +7,20 @@ import com.miaoshaproject.miaosha.error.EmBusinessError;
 import com.miaoshaproject.miaosha.response.CommonReturnType;
 import com.miaoshaproject.miaosha.service.UserService;
 import com.miaoshaproject.miaosha.service.model.UserModel;
-import com.miaoshaproject.miaosha.validator.ValidationImpl;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.apache.commons.codec.binary.Base64;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Random;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @Author yangLe
@@ -34,6 +37,9 @@ public class UserController{
 
     private HttpServletRequest httpServletRequest;
 
+    @Resource
+    private RedisTemplate redisTemplate;
+
 
     public UserController(UserService userService, HttpServletRequest httpServletRequest) {
         this.userService = userService;
@@ -48,10 +54,17 @@ public class UserController{
         if (StringUtils.isEmpty(telphone) || StringUtils.isEmpty(password)){
             throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR);
         }
+
         UserModel userModel = userService.verifyLogin(telphone, getEncrptPassword(password));
-        httpServletRequest.getSession().setAttribute("LOGIN_USER", userModel);
-        httpServletRequest.getSession().setAttribute("IS_LOGIN", true);
-        return CommonReturnType.create(null);
+        //若用户登录成功，将登录凭证加入到用户登录成功的session内
+        //httpServletRequest.getSession().setAttribute("LOGIN_USER", userModel);
+        //httpServletRequest.getSession().setAttribute("IS_LOGIN", true);
+
+        //生成登录凭据（token）
+        String token = UUID.randomUUID().toString().replace("-", "");
+        //将登录凭据存入redis中
+        redisTemplate.opsForValue().set(token, userModel, 1, TimeUnit.HOURS);
+        return CommonReturnType.create(token);
     }
 
     @RequestMapping(value = "/register", method = RequestMethod.POST)
