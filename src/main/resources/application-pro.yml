@@ -21,3 +21,12 @@ spring:
     resources:
       #不要为我们工程中的资源文件建立映射
       add-mappings: false
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    database: 10
+    #设置jedis连接池
+    jedis:
+      pool:
+        max-active: 50
+        min-idle: 20
