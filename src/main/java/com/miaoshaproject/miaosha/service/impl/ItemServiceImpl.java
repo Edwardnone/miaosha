@@ -77,9 +77,13 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemModel getItemById(Integer id) {
         ItemDO itemDO = itemDOMapper.selectByPrimaryKey(id);
+        if (itemDO == null){
+            return null;
+        }
+        //获取库存数量
         ItemStockDO itemStockDO = itemStockDOMapper.selectByItemId(id);
         ItemModel itemModel = convertItemModelFromDataObject(itemDO, itemStockDO);
-        //判断商品当前是否存在秒杀活动
+        //获取商品活动信息
         PromoModel promoModel = promoService.getPromoByItemId(itemDO.getId());
         if (promoModel != null && promoModel.getPromoStatus() != 0){
             itemModel.setPromoModel(promoModel);

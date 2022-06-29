@@ -6,15 +6,18 @@ import com.miaoshaproject.miaosha.response.CommonReturnType;
 import com.miaoshaproject.miaosha.service.ItemService;
 import com.miaoshaproject.miaosha.service.model.ItemModel;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @Author yangLe
@@ -27,6 +30,9 @@ import java.util.List;
 public class ItemController{
 
     private ItemService itemService;
+
+    @Resource
+    private RedisTemplate redisTemplate;
 
     public ItemController(ItemService itemService) {
         this.itemService = itemService;
@@ -66,8 +72,15 @@ public class ItemController{
     @RequestMapping(value = "/getItem", method = RequestMethod.GET)
     @ResponseBody
     public CommonReturnType getItem(@RequestParam(name = "id") Integer id){
-        ItemModel itemModel = itemService.getItemById(id);
+        //首先读取redis缓存
+        ItemModel itemModel = (ItemModel) redisTemplate.opsForValue().get("item_" + id);
+        if (itemModel == null){
+            itemModel = itemService.getItemById(id);
+        }
         ItemVO itemVO = convertItemVOFromItemModel(itemModel);
+        //存入redis缓存
+        redisTemplate.opsForValue().set("item_" + id, itemModel);
+        redisTemplate.expire("item_" + id, 10, TimeUnit.MINUTES);
         return CommonReturnType.create(itemVO);
     }
 

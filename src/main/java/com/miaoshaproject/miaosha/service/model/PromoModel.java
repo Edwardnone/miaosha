@@ -4,6 +4,7 @@ import com.fasterxml.jackson.datatype.joda.deser.DateTimeDeserializer;
 import com.fasterxml.jackson.datatype.joda.ser.DateTimeSerializer;
 import org.joda.time.DateTime;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 
 /**
@@ -12,7 +13,7 @@ import java.math.BigDecimal;
  * @Date 2022/6/21 14:41
  * @Version 1.0
  */
-public class PromoModel {
+public class PromoModel implements Serializable {
     private Integer id;
     /**
      * 秒杀活动名称
