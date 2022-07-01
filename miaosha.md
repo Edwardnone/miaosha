@@ -629,7 +629,7 @@ public class RedisConfig {
 
 优化后的查询性能：
 
-![image-20220630083015630](C:\Users\12195\AppData\Roaming\Typora\typora-user-images\image-20220630083015630.png)
+<img src="C:\Users\12195\AppData\Roaming\Typora\typora-user-images\image-20220630083015630.png" alt="image-20220630083015630" style="zoom:150%;" />
 
 ### 7.4.本地热点缓存
 
@@ -693,3 +693,47 @@ public class CacheServiceImpl implements CacheService {
 ![image-20220630102757285](C:\Users\12195\AppData\Roaming\Typora\typora-user-images\image-20220630102757285.png)
 
 ![image-20220630102506488](C:\Users\12195\AppData\Roaming\Typora\typora-user-images\image-20220630102506488.png)
+
+![image-20220701224821362](C:\Users\12195\AppData\Roaming\Typora\typora-user-images\image-20220701224821362.png)
+
+
+
+### 7.6.OpenResty实践
+
+- OpenResty hello world
+
+- shared dic:共享内存字典
+
+- openResty redis支持
+
+  itemredis.lua
+
+  ```lua
+  local args = ngx.req.get_uri_args()
+  local id = args["id"]
+  local redis = require "resty.redis"
+  local cache = redis:new()
+  local ok,err = cache:connect("172.17.16.15", 6379)
+  cache:auth("fesi!#FSS32$@#@.22s")
+  cache:select(10)
+  local item_model = cache:get("item_"..id)
+  if item_model == ngx.null or item_model == nil then
+          local resp = ngx.location.capture("/item/getItem?id="..id)
+          item_model = resp.body
+  end
+  
+  ngx.say(item_model)
+  ```
+
+  ```conf
+  location /luaitem/get{
+              default_type "application/json";
+              content_by_lua_file ../lua/itemredis.lua;
+          }
+  ```
+
+  平均访问耗时远超没有访问redis，可能原因:缺乏高效的redis连接池，大量时间消耗在redis连接上
+
+  ![image-20220701224551807](C:\Users\12195\AppData\Roaming\Typora\typora-user-images\image-20220701224551807.png)
+
+  ![image-20220701225811666](C:\Users\12195\AppData\Roaming\Typora\typora-user-images\image-20220701225811666.png)
