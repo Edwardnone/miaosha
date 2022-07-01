@@ -3,6 +3,7 @@ package com.miaoshaproject.miaosha.controller;
 import com.miaoshaproject.miaosha.controller.viewobject.ItemVO;
 import com.miaoshaproject.miaosha.error.BusinessException;
 import com.miaoshaproject.miaosha.response.CommonReturnType;
+import com.miaoshaproject.miaosha.service.CacheService;
 import com.miaoshaproject.miaosha.service.ItemService;
 import com.miaoshaproject.miaosha.service.model.ItemModel;
 import org.springframework.beans.BeanUtils;
@@ -34,8 +35,11 @@ public class ItemController{
     @Resource
     private RedisTemplate redisTemplate;
 
-    public ItemController(ItemService itemService) {
+    private CacheService cacheService;
+
+    public ItemController(ItemService itemService, CacheService cacheService) {
         this.itemService = itemService;
+        this.cacheService = cacheService;
     }
 
     @RequestMapping("/createItem")
@@ -72,15 +76,23 @@ public class ItemController{
     @RequestMapping(value = "/getItem", method = RequestMethod.GET)
     @ResponseBody
     public CommonReturnType getItem(@RequestParam(name = "id") Integer id){
-        //首先读取redis缓存
-        ItemModel itemModel = (ItemModel) redisTemplate.opsForValue().get("item_" + id);
+
+        //读取本地缓存
+        ItemModel itemModel = (ItemModel) cacheService.getFromCommonCache("item_" + id);
         if (itemModel == null){
-            itemModel = itemService.getItemById(id);
+            //读取redis缓存
+            itemModel = (ItemModel) redisTemplate.opsForValue().get("item_" + id);
+            if (itemModel == null){
+                //读mysql数据库
+                itemModel = itemService.getItemById(id);
+                //存入redis缓存
+                redisTemplate.opsForValue().set("item_" + id, itemModel);
+                redisTemplate.expire("item_" + id, 10, TimeUnit.MINUTES);
+            }
+            //存入本地缓存
+            cacheService.setCommonCache("item_" + id, itemModel);
         }
         ItemVO itemVO = convertItemVOFromItemModel(itemModel);
-        //存入redis缓存
-        redisTemplate.opsForValue().set("item_" + id, itemModel);
-        redisTemplate.expire("item_" + id, 10, TimeUnit.MINUTES);
         return CommonReturnType.create(itemVO);
     }
 
