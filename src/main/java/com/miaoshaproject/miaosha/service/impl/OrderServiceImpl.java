@@ -9,7 +9,9 @@ import com.miaoshaproject.miaosha.service.OrderService;
 import com.miaoshaproject.miaosha.service.SequenceService;
 import com.miaoshaproject.miaosha.service.UserService;
 import com.miaoshaproject.miaosha.service.model.ItemModel;
+import com.miaoshaproject.miaosha.service.model.OrderModel;
 import com.miaoshaproject.miaosha.service.model.UserModel;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,13 +58,39 @@ public class OrderServiceImpl implements OrderService {
         if (amount <= 0 || amount >= 100){
             throw new BusinessException(EmBusinessError.ITEM_AMOUNT_ILLEGAL_ERROR);
         }
+        //校验活动信息
+        if (promoId != null){
+            //校验对应活动是否存在这个商品
+            if (promoId.intValue() != itemModel.getPromoModel().getId()){
+                throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR, "活动信息不存在");
+            }else if (itemModel.getPromoModel().getPromoStatus().intValue() != 2){
+                throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR, "活动信息不存在");
+            }
+        }
         //下单锁定库存（这里不用支付锁定）
         boolean result = itemService.decreaseStock(amount, itemId);
         if (!result){
             throw new BusinessException(EmBusinessError.ITEM_STOCK_NOT_ENOUGH);
         }
+        OrderModel orderModel = new OrderModel();
+        orderModel.setUserId(userId);
+        orderModel.setAmount(amount);
+        orderModel.setItemId(itemModel.getId());
+        if (promoId != null){
+            orderModel.setOrderAmount(itemModel.getPromoModel().getPromoItemPrice().multiply(new BigDecimal(amount)));
+        }else {
+            orderModel.setOrderAmount(itemModel.getPrice().multiply(new BigDecimal(amount)));
+        }
         //创建订单记录
         //生成订单id
+        OrderDO orderDO = convertFromOrderModel(orderModel);
+        orderDO.setId(generateOrderId());
+        orderDOMapper.insertSelective(orderDO);
+        //增加销量数
+        itemService.increaseSales(itemId, amount);
+    }
+
+    private String generateOrderId(){
         StringBuilder orderId = new StringBuilder();
         //加上时间
         String time = LocalDateTime.now().format(DateTimeFormatter.ISO_DATE);
@@ -76,19 +104,12 @@ public class OrderServiceImpl implements OrderService {
         orderId.append(sequence);
         //加上分库分表号
         orderId.append("00");
+        return orderId.toString();
+    }
+
+    private OrderDO convertFromOrderModel(OrderModel orderModel){
         OrderDO orderDO = new OrderDO();
-        orderDO.setId(orderId.toString());
-        orderDO.setUserId(userId);
-        orderDO.setItemId(itemId);
-        orderDO.setPromoId(promoId);
-        orderDO.setAmount(amount);
-        if (promoItemPrice == null){
-            orderDO.setOrderAmount(itemModel.getPrice().multiply(new BigDecimal(amount)));
-        }else {
-            orderDO.setOrderAmount(promoItemPrice.multiply(new BigDecimal(amount)));
-        }
-        orderDOMapper.insertSelective(orderDO);
-        //增加销量数
-        itemService.increaseSales(itemId, amount);
+        BeanUtils.copyProperties(orderModel, orderDO);
+        return orderDO;
     }
 }

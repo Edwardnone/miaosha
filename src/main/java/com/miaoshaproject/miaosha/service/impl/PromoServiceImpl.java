@@ -38,6 +38,7 @@ public class PromoServiceImpl implements PromoService {
                 //未开始
                 promoModel.setPromoStatus(1);
             }else{
+                //正在进行
                 promoModel.setPromoStatus(2);
             }
         }

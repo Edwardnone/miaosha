@@ -54,7 +54,12 @@ public class OrderController{
         //    throw new BusinessException(EmBusinessError.USER_NOT_LOGIN_ERROR);
         //}
         //UserModel userModel = (UserModel) httpServletRequest.getSession().getAttribute("LOGIN_USER");
-        String token = (String) httpServletRequest.getParameterMap().get("token")[0];
+        //String paramArray = httpServletRequest.getParameterMap().get("token")[0];
+        String[] tokenArray = httpServletRequest.getParameterMap().get("token");
+        if (tokenArray == null){
+            throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR, "缺少token参数");
+        }
+        String token = tokenArray[0];
         if (StringUtils.isEmpty(token)){
             throw new BusinessException(EmBusinessError.USER_NOT_LOGIN_ERROR);
         }
