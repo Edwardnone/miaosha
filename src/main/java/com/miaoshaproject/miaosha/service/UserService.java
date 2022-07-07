@@ -20,6 +20,13 @@ public interface UserService {
     UserModel getUserById(Integer id);
 
     /**
+     * 从redis缓存获取用户对象信息
+     * @param id
+     * @return
+     */
+    UserModel getUserByIdInCache(Integer id);
+
+    /**
      * 用户注册
      * @param userModel
      * @return

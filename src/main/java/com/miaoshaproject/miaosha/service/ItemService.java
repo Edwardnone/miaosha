@@ -35,6 +35,13 @@ public interface ItemService {
     public ItemModel getItemById(Integer id);
 
     /**
+     * 通过redis缓存查询商品信息
+     * @param id
+     * @return
+     */
+    public ItemModel getItemByIdInCache(Integer id);
+
+    /**
      * 减少指定id商品的库存数量
      * @param amount
      * @param itemId

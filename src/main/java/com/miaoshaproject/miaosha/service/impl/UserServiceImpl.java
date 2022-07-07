@@ -13,8 +13,12 @@ import com.miaoshaproject.miaosha.validator.ValidationResult;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Resource;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @Author yangLe
@@ -30,6 +34,9 @@ public class UserServiceImpl implements UserService {
     private UserPasswordDOMapper userPasswordDOMapper;
 
     private ValidationImpl validationImpl;
+
+    @Resource
+    private RedisTemplate redisTemplate;
 
     public UserServiceImpl(UserDOMapper userDOMapper, UserPasswordDOMapper userPasswordDOMapper, ValidationImpl validationImpl) {
         this.userDOMapper = userDOMapper;
@@ -53,6 +60,16 @@ public class UserServiceImpl implements UserService {
 
     }
 
+    @Override
+    public UserModel getUserByIdInCache(Integer id) {
+        UserModel userModel = (UserModel) redisTemplate.opsForValue().get("validate_user_"+id);
+        if (userModel == null){
+            userModel = getUserById(id);
+            redisTemplate.opsForValue().set("validate_user_"+id, userModel);
+            redisTemplate.expire("validate_user_"+id, 10, TimeUnit.MINUTES);
+        }
+        return userModel;
+    }
 
 
     @Override

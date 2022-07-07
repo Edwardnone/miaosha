@@ -47,11 +47,11 @@ public class OrderServiceImpl implements OrderService {
     @Transactional(rollbackFor = java.lang.Exception.class)
     public void createOrder(Integer userId, Integer itemId, Integer promoId, Integer amount, BigDecimal promoItemPrice) throws BusinessException {
         //校验参数
-        UserModel userModel = userService.getUserById(userId);
+        UserModel userModel = userService.getUserByIdInCache(userId);
         if (userModel == null){
             throw new BusinessException(EmBusinessError.USER_NOT_EXIST_ERROR);
         }
-        ItemModel itemModel = itemService.getItemById(itemId);
+        ItemModel itemModel = itemService.getItemByIdInCache(itemId);
         if(itemModel == null){
             throw new BusinessException(EmBusinessError.ITEM_NOT_EXIST_ERROR);
         }

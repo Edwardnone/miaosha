@@ -14,10 +14,13 @@ import com.miaoshaproject.miaosha.validator.ValidationImpl;
 import com.miaoshaproject.miaosha.validator.ValidationResult;
 import org.joda.time.DateTime;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -33,6 +36,9 @@ public class ItemServiceImpl implements ItemService {
     private ItemDOMapper itemDOMapper;
     private ItemStockDOMapper itemStockDOMapper;
     private PromoService promoService;
+
+    @Resource
+    private RedisTemplate redisTemplate;
 
     public ItemServiceImpl(ValidationImpl validation, ItemDOMapper itemDOMapper, ItemStockDOMapper itemStockDOMapper, PromoService promoService) {
         this.validationImpl = validation;
@@ -87,6 +93,17 @@ public class ItemServiceImpl implements ItemService {
         PromoModel promoModel = promoService.getPromoByItemId(itemDO.getId());
         if (promoModel != null && promoModel.getPromoStatus() != 0){
             itemModel.setPromoModel(promoModel);
+        }
+        return itemModel;
+    }
+
+    @Override
+    public ItemModel getItemByIdInCache(Integer id) {
+        ItemModel itemModel = (ItemModel) redisTemplate.opsForValue().get("validate_item_" + id);
+        if (itemModel == null){
+            itemModel = getItemById(id);
+            redisTemplate.opsForValue().set("validate_item_"+id, itemModel);
+            redisTemplate.expire("validate_item_"+id, 10, TimeUnit.MINUTES);
         }
         return itemModel;
     }
