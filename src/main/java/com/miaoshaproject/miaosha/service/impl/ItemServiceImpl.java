@@ -2,10 +2,13 @@ package com.miaoshaproject.miaosha.service.impl;
 
 import com.miaoshaproject.miaosha.dao.ItemDOMapper;
 import com.miaoshaproject.miaosha.dao.ItemStockDOMapper;
+import com.miaoshaproject.miaosha.dao.PromoDOMapper;
 import com.miaoshaproject.miaosha.dataobject.ItemDO;
 import com.miaoshaproject.miaosha.dataobject.ItemStockDO;
+import com.miaoshaproject.miaosha.dataobject.PromoDO;
 import com.miaoshaproject.miaosha.error.BusinessException;
 import com.miaoshaproject.miaosha.error.EmBusinessError;
+import com.miaoshaproject.miaosha.mq.MqProducer;
 import com.miaoshaproject.miaosha.service.ItemService;
 import com.miaoshaproject.miaosha.service.PromoService;
 import com.miaoshaproject.miaosha.service.model.ItemModel;
@@ -36,6 +39,12 @@ public class ItemServiceImpl implements ItemService {
     private ItemDOMapper itemDOMapper;
     private ItemStockDOMapper itemStockDOMapper;
     private PromoService promoService;
+
+    @Resource
+    private PromoDOMapper promoDOMapper;
+
+    @Resource
+    private MqProducer mqProducer;
 
     @Resource
     private RedisTemplate redisTemplate;
@@ -111,11 +120,18 @@ public class ItemServiceImpl implements ItemService {
     @Transactional(rollbackFor = java.lang.Exception.class)
     @Override
     public Boolean decreaseStock(Integer amount, Integer itemId) {
-        int res = itemStockDOMapper.decreaseStock(amount, itemId);
-        if (res > 0){
+        long result = redisTemplate.opsForValue().decrement("promo_item_stock_" + itemId, amount.intValue());
+        if (result >= 0){
+            boolean mqResult = mqProducer.asyncReduceStock(itemId, amount);
+            if (!mqResult){
+                redisTemplate.opsForValue().increment("promo_item_stock_"+ itemId, amount.intValue());
+                return false;
+            }
             return true;
+        }else {
+            redisTemplate.opsForValue().increment("promo_item_stock_"+ itemId, amount.intValue());
+            return false;
         }
-        return false;
     }
 
     @Transactional(rollbackFor = java.lang.Exception.class)
@@ -143,5 +159,21 @@ public class ItemServiceImpl implements ItemService {
         itemModel.setStock(itemStockDO.getStock());
         return itemModel;
     }
+
+    @Override
+    public void promoPublish(Integer promoId) {
+        //通过活动id获取商品id
+        PromoDO promoDO = promoDOMapper.selectByPrimaryKey(promoId);
+        if (promoDO == null || promoDO.getItemId().intValue() == 0){
+            return;
+        }
+        ItemModel itemModel = getItemById(promoDO.getItemId());
+        if (itemModel != null){
+            //讲库存同步到缓存中
+            redisTemplate.opsForValue().set("promo_item_stock_" + itemModel.getId(), itemModel.getStock());
+        }
+    }
+
+
 
 }

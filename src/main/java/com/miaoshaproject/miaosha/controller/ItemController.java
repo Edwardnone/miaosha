@@ -5,6 +5,7 @@ import com.miaoshaproject.miaosha.error.BusinessException;
 import com.miaoshaproject.miaosha.response.CommonReturnType;
 import com.miaoshaproject.miaosha.service.CacheService;
 import com.miaoshaproject.miaosha.service.ItemService;
+import com.miaoshaproject.miaosha.service.PromoService;
 import com.miaoshaproject.miaosha.service.model.ItemModel;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -36,6 +37,9 @@ public class ItemController{
     private RedisTemplate redisTemplate;
 
     private CacheService cacheService;
+
+    @Resource
+    private PromoService promoService;
 
     public ItemController(ItemService itemService, CacheService cacheService) {
         this.itemService = itemService;
@@ -114,5 +118,12 @@ public class ItemController{
             itemVO.setStatus(0);
         }
         return itemVO;
+    }
+
+    @RequestMapping(value = "/publishPromo", method = RequestMethod.GET)
+    @ResponseBody
+    public CommonReturnType publishPromo(@RequestParam(name = "id") Integer id){
+        itemService.promoPublish(id);
+        return CommonReturnType.create(null);
     }
 }

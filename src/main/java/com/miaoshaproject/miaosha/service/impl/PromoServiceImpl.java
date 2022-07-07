@@ -2,11 +2,16 @@ package com.miaoshaproject.miaosha.service.impl;
 
 import com.miaoshaproject.miaosha.dao.PromoDOMapper;
 import com.miaoshaproject.miaosha.dataobject.PromoDO;
+import com.miaoshaproject.miaosha.service.ItemService;
 import com.miaoshaproject.miaosha.service.PromoService;
+import com.miaoshaproject.miaosha.service.model.ItemModel;
 import com.miaoshaproject.miaosha.service.model.PromoModel;
 import org.joda.time.DateTime;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
 
 /**
  * @Author yangLe
@@ -55,4 +60,6 @@ public class PromoServiceImpl implements PromoService {
         promoModel.setEndTime(new DateTime(promoDO.getEndTime()));
         return promoModel;
     }
+
+
 }

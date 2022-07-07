@@ -51,4 +51,11 @@ public interface PromoDOMapper {
      * @mbg.generated Tue Jun 21 15:15:10 GMT+08:00 2022
      */
     int updateByPrimaryKey(PromoDO row);
+
+    /**
+     * 通过主键id获取活动信息
+     * @param id
+     * @return
+     */
+    PromoDO selectByPrimaryKey(Integer id);
 }
