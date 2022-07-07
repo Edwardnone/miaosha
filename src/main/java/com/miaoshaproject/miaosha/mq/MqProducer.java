@@ -31,6 +31,7 @@ public class MqProducer {
     @Value("${mq.topicname}")
     private String topicName;
 
+    //@PostConstruct注解的方法将会在依赖注入完成后被自动调用
     @PostConstruct
     public void init() throws MQClientException {
         //做mq producer的初始化
