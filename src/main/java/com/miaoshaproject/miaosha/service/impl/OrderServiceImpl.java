@@ -1,9 +1,12 @@
 package com.miaoshaproject.miaosha.service.impl;
 
 import com.miaoshaproject.miaosha.dao.OrderDOMapper;
+import com.miaoshaproject.miaosha.dao.StockLogDOMapper;
 import com.miaoshaproject.miaosha.dataobject.OrderDO;
+import com.miaoshaproject.miaosha.dataobject.StockLogDO;
 import com.miaoshaproject.miaosha.error.BusinessException;
 import com.miaoshaproject.miaosha.error.EmBusinessError;
+import com.miaoshaproject.miaosha.mq.MqProducer;
 import com.miaoshaproject.miaosha.service.ItemService;
 import com.miaoshaproject.miaosha.service.OrderService;
 import com.miaoshaproject.miaosha.service.SequenceService;
@@ -14,7 +17,10 @@ import com.miaoshaproject.miaosha.service.model.UserModel;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -36,6 +42,9 @@ public class OrderServiceImpl implements OrderService {
 
     private OrderDOMapper orderDOMapper;
 
+    @Resource
+    private StockLogDOMapper stockLogDOMapper;
+
     public OrderServiceImpl(UserService userService, ItemService itemService, SequenceService sequenceService, OrderDOMapper orderDOMapper) {
         this.userService = userService;
         this.itemService = itemService;
@@ -45,7 +54,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional(rollbackFor = java.lang.Exception.class)
-    public void createOrder(Integer userId, Integer itemId, Integer promoId, Integer amount, BigDecimal promoItemPrice) throws BusinessException {
+    public OrderModel createOrder(Integer userId, Integer itemId, Integer promoId, Integer amount, String stockLogId) throws BusinessException {
         //校验参数
         UserModel userModel = userService.getUserByIdInCache(userId);
         if (userModel == null){
@@ -72,6 +81,7 @@ public class OrderServiceImpl implements OrderService {
         if (!result){
             throw new BusinessException(EmBusinessError.ITEM_STOCK_NOT_ENOUGH);
         }
+        //订单入库
         OrderModel orderModel = new OrderModel();
         orderModel.setUserId(userId);
         orderModel.setAmount(amount);
@@ -85,9 +95,36 @@ public class OrderServiceImpl implements OrderService {
         //生成订单id
         OrderDO orderDO = convertFromOrderModel(orderModel);
         orderDO.setId(generateOrderId());
+
         orderDOMapper.insertSelective(orderDO);
         //增加销量数
         itemService.increaseSales(itemId, amount);
+
+        //TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+        //    @Override
+        //    public void afterCommit() {
+        //        //异步更新库存
+        //        boolean mqResult = itemService.asyncDecreaseStock(amount, itemId);
+        //        //if (!mqResult){
+        //        //    itemService.increaseStock(amount, itemId);
+        //        //    throw new BusinessException(EmBusinessError.MQ_SEND_FAIL);
+        //        //}
+        //    }
+        //});
+
+        //修改库存流水状态
+        StockLogDO stockLogDO = stockLogDOMapper.selectByPrimaryKey(stockLogId);
+        if (stockLogDO == null){
+            throw new BusinessException(EmBusinessError.UNKNOWN_ERROR);
+        }
+        stockLogDO.setStatus(2);
+        stockLogDOMapper.updateByPrimaryKeySelective(stockLogDO);
+        try {
+            Thread.sleep(30000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return orderModel;
     }
 
     private String generateOrderId(){

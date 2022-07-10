@@ -50,6 +50,22 @@ public interface ItemService {
     public Boolean decreaseStock(Integer amount, Integer itemId);
 
     /**
+     * 异步更新库存
+     * @param amount
+     * @param itemId
+     * @return
+     */
+    //public boolean asyncDecreaseStock(Integer amount, Integer itemId);
+
+    /**
+     * redis库存回补
+     * @param amount
+     * @param itemId
+     * @return
+     */
+    public Boolean increaseStock(Integer amount, Integer itemId);
+
+    /**
      * 增加指定id商品的销量
      * @param itemId
      * @param amount
@@ -60,4 +76,12 @@ public interface ItemService {
      * @param promoId
      */
     public void promoPublish(Integer promoId);
+
+    /**
+     * 初始化库存流水
+     * @param itemId
+     * @param amount
+     * @return
+     */
+    public String initStockLog(Integer itemId, Integer amount);
 }

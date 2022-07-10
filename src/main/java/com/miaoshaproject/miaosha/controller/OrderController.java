@@ -3,7 +3,9 @@ package com.miaoshaproject.miaosha.controller;
 import com.fasterxml.jackson.databind.ser.Serializers;
 import com.miaoshaproject.miaosha.error.BusinessException;
 import com.miaoshaproject.miaosha.error.EmBusinessError;
+import com.miaoshaproject.miaosha.mq.MqProducer;
 import com.miaoshaproject.miaosha.response.CommonReturnType;
+import com.miaoshaproject.miaosha.service.ItemService;
 import com.miaoshaproject.miaosha.service.OrderService;
 import com.miaoshaproject.miaosha.service.model.UserModel;
 import org.apache.commons.lang3.StringUtils;
@@ -31,6 +33,12 @@ public class OrderController{
     private OrderService orderService;
 
     private HttpServletRequest httpServletRequest;
+
+    @Resource
+    private ItemService itemService;
+
+    @Resource
+    private MqProducer mqProducer;
 
     @Resource
     private RedisTemplate redisTemplate;
@@ -67,7 +75,19 @@ public class OrderController{
         if (userModel == null){
             throw new BusinessException(EmBusinessError.USER_NOT_LOGIN_ERROR);
         }
-        orderService.createOrder(userModel.getId(), itemId, promoId, amount, promoItemPrice);
+
+
+        if (redisTemplate.hasKey("promo_item_stock_invalid_" + itemId)){
+            //若库存售罄，不进行后续操作
+            throw new BusinessException(EmBusinessError.ITEM_STOCK_NOT_ENOUGH);
+        }
+        //加入库存流水init状态
+        String stockLogId = itemService.initStockLog(itemId, amount);
+
+        if (!mqProducer.asyncTransactionReduceStock(userModel.getId(), promoId, itemId, amount, stockLogId)){
+            throw new BusinessException(EmBusinessError.UNKNOWN_ERROR);
+        }
+        //orderService.createOrder(userModel.getId(), itemId, promoId, amount);
 
         return CommonReturnType.create(null);
     }

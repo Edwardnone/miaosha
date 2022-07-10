@@ -19,6 +19,7 @@ public enum EmBusinessError implements CommonError{
     ITEM_NOT_EXIST_ERROR(30001, "下单商品不存在"),
     ITEM_AMOUNT_ILLEGAL_ERROR(30002, "下单数量非法"),
     ITEM_STOCK_NOT_ENOUGH(30003, "库存不足"),
+    MQ_SEND_FAIL(30004, "MQ发送消息失败"),
     ;
 
     private EmBusinessError(int errCode, String errMsg){
