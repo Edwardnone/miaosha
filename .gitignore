@@ -32,7 +32,8 @@ build/
 ### VS Code ###
 .vscode/
 
-src/main/resources/mybatis-generator.xml
 
+src/main/resources/mybatis-generator.xml
+mybatis-generator.xml
 
 miaosha.md
