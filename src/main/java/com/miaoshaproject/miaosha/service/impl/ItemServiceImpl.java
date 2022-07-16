@@ -19,6 +19,7 @@ import com.miaoshaproject.miaosha.validator.ValidationImpl;
 import com.miaoshaproject.miaosha.validator.ValidationResult;
 import org.joda.time.DateTime;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,10 +42,9 @@ public class ItemServiceImpl implements ItemService {
     private ValidationImpl validationImpl;
     private ItemDOMapper itemDOMapper;
     private ItemStockDOMapper itemStockDOMapper;
-    private PromoService promoService;
 
-    @Resource
-    private PromoDOMapper promoDOMapper;
+    @Autowired
+    private PromoService promoService;
 
     @Resource
     private StockLogDOMapper stockLogDOMapper;
@@ -55,11 +55,10 @@ public class ItemServiceImpl implements ItemService {
     @Resource
     private RedisTemplate redisTemplate;
 
-    public ItemServiceImpl(ValidationImpl validation, ItemDOMapper itemDOMapper, ItemStockDOMapper itemStockDOMapper, PromoService promoService) {
+    public ItemServiceImpl(ValidationImpl validation, ItemDOMapper itemDOMapper, ItemStockDOMapper itemStockDOMapper) {
         this.validationImpl = validation;
         this.itemDOMapper = itemDOMapper;
         this.itemStockDOMapper = itemStockDOMapper;
-        this.promoService = promoService;
     }
 
     @Override
@@ -114,11 +113,11 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemModel getItemByIdInCache(Integer id) {
-        ItemModel itemModel = (ItemModel) redisTemplate.opsForValue().get("validate_item_" + id);
+        ItemModel itemModel = (ItemModel) redisTemplate.opsForValue().get("item_validate_" + id);
         if (itemModel == null){
             itemModel = getItemById(id);
-            redisTemplate.opsForValue().set("validate_item_"+id, itemModel);
-            redisTemplate.expire("validate_item_"+id, 10, TimeUnit.MINUTES);
+            redisTemplate.opsForValue().set("item_validate_"+id, itemModel);
+            redisTemplate.expire("item_validate_"+id, 10, TimeUnit.MINUTES);
         }
         return itemModel;
     }
@@ -178,19 +177,19 @@ public class ItemServiceImpl implements ItemService {
         return itemModel;
     }
 
-    @Override
-    public void promoPublish(Integer promoId) {
-        //通过活动id获取商品id
-        PromoDO promoDO = promoDOMapper.selectByPrimaryKey(promoId);
-        if (promoDO == null || promoDO.getItemId().intValue() == 0){
-            return;
-        }
-        ItemModel itemModel = getItemById(promoDO.getItemId());
-        if (itemModel != null){
-            //讲库存同步到缓存中
-            redisTemplate.opsForValue().set("promo_item_stock_" + itemModel.getId(), itemModel.getStock());
-        }
-    }
+    //@Override
+    //public void promoPublish(Integer promoId) {
+    //    //通过活动id获取商品id
+    //    PromoDO promoDO = promoDOMapper.selectByPrimaryKey(promoId);
+    //    if (promoDO == null || promoDO.getItemId().intValue() == 0){
+    //        return;
+    //    }
+    //    ItemModel itemModel = getItemById(promoDO.getItemId());
+    //    if (itemModel != null){
+    //        //讲库存同步到缓存中
+    //        redisTemplate.opsForValue().set("promo_item_stock_" + itemModel.getId(), itemModel.getStock());
+    //    }
+    //}
 
     @Transactional(rollbackFor = java.lang.Exception.class)
     @Override

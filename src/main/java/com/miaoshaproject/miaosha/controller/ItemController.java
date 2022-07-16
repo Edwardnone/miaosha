@@ -123,7 +123,7 @@ public class ItemController{
     @RequestMapping(value = "/publishPromo", method = RequestMethod.GET)
     @ResponseBody
     public CommonReturnType publishPromo(@RequestParam(name = "id") Integer id){
-        itemService.promoPublish(id);
+        promoService.promoPublish(id);
         return CommonReturnType.create(null);
     }
 }

@@ -62,11 +62,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserModel getUserByIdInCache(Integer id) {
-        UserModel userModel = (UserModel) redisTemplate.opsForValue().get("validate_user_"+id);
+        UserModel userModel = (UserModel) redisTemplate.opsForValue().get("user_validate_"+id);
         if (userModel == null){
             userModel = getUserById(id);
-            redisTemplate.opsForValue().set("validate_user_"+id, userModel);
-            redisTemplate.expire("validate_user_"+id, 10, TimeUnit.MINUTES);
+            redisTemplate.opsForValue().set("user_validate_"+id, userModel);
+            redisTemplate.expire("user_validate_"+id, 10, TimeUnit.MINUTES);
         }
         return userModel;
     }

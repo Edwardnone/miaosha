@@ -30,3 +30,12 @@ spring:
       pool:
         max-active: 50
         min-idle: 20
+  main:
+    #允许循环依赖
+    allow-circular-references: true
+
+#配置springboot对redis的依赖
+mq:
+  nameserver:
+    addr: 101.34.234.34:9876
+  topicname: stock

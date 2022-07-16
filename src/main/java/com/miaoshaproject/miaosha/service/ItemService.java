@@ -71,11 +71,11 @@ public interface ItemService {
      * @param amount
      */
     public void increaseSales(Integer itemId, Integer amount);
-    /**
-     * 发布活动，将活动商品库存存入redis缓存
-     * @param promoId
-     */
-    public void promoPublish(Integer promoId);
+    ///**
+    // * 发布活动，将活动商品库存存入redis缓存
+    // * @param promoId
+    // */
+    //public void promoPublish(Integer promoId);
 
     /**
      * 初始化库存流水

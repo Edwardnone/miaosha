@@ -16,4 +16,18 @@ public interface PromoService {
      * @return
      */
     public PromoModel getPromoByItemId(Integer itemId);
+    /**
+     * 发布活动，将活动商品库存存入redis缓存
+     * @param promoId
+     */
+    public void promoPublish(Integer promoId);
+
+    /**
+     * 生成秒杀令牌
+     * @param promoId
+     * @param userId
+     * @param itemId
+     * @return
+     */
+    public String generateToken(Integer promoId, Integer userId, Integer itemId);
 }
