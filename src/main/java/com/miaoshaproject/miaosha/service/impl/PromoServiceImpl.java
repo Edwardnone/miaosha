@@ -20,6 +20,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.UUID;
@@ -32,6 +33,7 @@ import java.util.concurrent.TimeUnit;
  * @Version 1.0
  */
 @Service
+@Transactional
 public class PromoServiceImpl implements PromoService {
 
     private PromoDOMapper promoDOMapper;
@@ -84,13 +86,18 @@ public class PromoServiceImpl implements PromoService {
         if (promoDO == null || promoDO.getItemId().intValue() == 0){
             return;
         }
+
         ItemModel itemModel = itemService.getItemByIdInCache(promoDO.getItemId());
         if (itemModel != null){
+            //删除库存为空标识
+            redisTemplate.delete("promo_item_stock_invalid_" + itemModel.getId());
             //讲库存同步到缓存中
             redisTemplate.opsForValue().set("promo_item_stock_" + itemModel.getId(), itemModel.getStock());
+            //将秒杀大闸限制数字设置到redis
+            redisTemplate.opsForValue().set("promo_door_count_" + promoDO.getId(), itemModel.getStock() * 5);
+
         }
-        //将秒杀大闸限制数字设置到redis
-        redisTemplate.opsForValue().set("promo_door_count_" + promoDO.getId(), itemModel.getStock() * 5);
+
     }
 
     //循环依赖问题, itemId参数是否冗余

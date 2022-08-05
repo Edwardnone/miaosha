@@ -27,6 +27,7 @@ import java.util.concurrent.TimeUnit;
  * @Version 1.0
  */
 @Service
+@Transactional
 public class UserServiceImpl implements UserService {
 
     private UserDOMapper userDOMapper;

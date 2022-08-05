@@ -64,6 +64,12 @@ public class ItemController{
         return CommonReturnType.create(itemVO);
     }
 
+    @RequestMapping(value = "/test", method = RequestMethod.GET)
+    @ResponseBody
+    public CommonReturnType test(){
+        return CommonReturnType.create(null);
+    }
+
 
 
     @RequestMapping(value = "/listItem", method = RequestMethod.GET)

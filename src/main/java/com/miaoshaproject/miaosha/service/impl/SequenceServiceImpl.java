@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @Version 1.0
  */
 @Service("sequence")
+@Transactional
 public class SequenceServiceImpl implements SequenceService {
     private SequenceDOMapper sequenceDOMapper;
 

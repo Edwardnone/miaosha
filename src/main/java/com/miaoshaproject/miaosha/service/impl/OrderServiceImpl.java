@@ -33,6 +33,7 @@ import java.time.format.DateTimeFormatter;
  * @Version 1.0
  */
 @Service("orderService")
+@Transactional
 public class OrderServiceImpl implements OrderService {
 
     private UserService userService;
@@ -87,6 +88,7 @@ public class OrderServiceImpl implements OrderService {
             OrderModel orderModel = new OrderModel();
             orderModel.setUserId(userId);
             orderModel.setAmount(amount);
+            orderModel.setPromoId(itemModel.getPromoModel().getId());
             orderModel.setItemId(itemModel.getId());
             if (promoId != null){
                 orderModel.setOrderAmount(itemModel.getPromoModel().getPromoItemPrice().multiply(new BigDecimal(amount)));
@@ -100,7 +102,7 @@ public class OrderServiceImpl implements OrderService {
 
             orderDOMapper.insertSelective(orderDO);
             //增加销量数
-            itemService.increaseSales(itemId, amount);
+            //itemService.increaseSales(itemId, amount);
 
             //TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
             //    @Override
@@ -135,7 +137,7 @@ public class OrderServiceImpl implements OrderService {
 
     }
 
-    private String generateOrderId(){
+    public String generateOrderId(){
         StringBuilder orderId = new StringBuilder();
         //加上时间
         String time = LocalDateTime.now().format(DateTimeFormatter.ISO_DATE);

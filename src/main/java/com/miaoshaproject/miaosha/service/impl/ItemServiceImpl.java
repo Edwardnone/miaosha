@@ -37,6 +37,7 @@ import java.util.stream.Collectors;
  * @Version 1.0
  */
 @Service
+@Transactional
 public class ItemServiceImpl implements ItemService {
 
     private ValidationImpl validationImpl;
@@ -122,10 +123,10 @@ public class ItemServiceImpl implements ItemService {
         return itemModel;
     }
 
-    @Transactional(rollbackFor = java.lang.Exception.class)
+    //@Transactional(rollbackFor = java.lang.Exception.class)
     @Override
     public Boolean decreaseStock(Integer amount, Integer itemId) {
-        long result = redisTemplate.opsForValue().decrement("promo_item_stock_" + itemId, amount.intValue());
+        long result = redisTemplate.opsForValue().increment("promo_item_stock_" + itemId, amount.intValue()*-1);
         if (result > 0){
             return true;
         }else if (result == 0){

@@ -18,6 +18,14 @@ public class OrderModel {
 
     private Integer itemId;
 
+    public Integer getPromoId() {
+        return promoId;
+    }
+
+    public void setPromoId(Integer promoId) {
+        this.promoId = promoId;
+    }
+
     private Integer promoId;
 
     /**
