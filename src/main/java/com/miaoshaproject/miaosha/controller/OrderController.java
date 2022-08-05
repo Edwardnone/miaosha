@@ -1,6 +1,7 @@
 package com.miaoshaproject.miaosha.controller;
 
 import com.fasterxml.jackson.databind.ser.Serializers;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.miaoshaproject.miaosha.error.BusinessException;
 import com.miaoshaproject.miaosha.error.EmBusinessError;
 import com.miaoshaproject.miaosha.mq.MqProducer;
@@ -60,7 +61,9 @@ public class OrderController{
 
     @PostConstruct
     public void init(){
-        executorService = Executors.newFixedThreadPool(20);
+        ThreadFactory nameThreadFactory = new ThreadFactoryBuilder().setNameFormat("createOrder-pool-%d").build();
+        executorService = new ThreadPoolExecutor(20, 20, 10, TimeUnit.SECONDS, new LinkedBlockingQueue<>(100), nameThreadFactory, new ThreadPoolExecutor.AbortPolicy());
+        //executorService = Executors.newFixedThreadPool(20);
 
     }
 
